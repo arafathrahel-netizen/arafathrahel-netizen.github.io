@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="তুহিন ফকির - নিরাপদ লগইন সিস্টেম">
+    <title>লগইন - তুহিন ফকির</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/module.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+            padding: 40px 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 26px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            border-left: 4px solid #c33;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-spinner.show {
+            display: inline-block;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #999;
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            input {
+                padding: 11px 12px;
+                font-size: 16px;
+            }
+
+            .login-btn {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .container {
+                padding: 25px 15px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 নিরাপদ লগইন</h1>
+            <p>তুহিন ফকির প্রোফাইলে প্রবেশ করুন</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">ইমেইল অথবা ব্যবহারকারী নাম</label>
+                <input 
+                    type="text" 
+                    id="email" 
+                    name="email" 
+                    placeholder="আপনার ইমেইল বা ব্যবহারকারী নাম" 
+                    required 
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">পাসওয়ার্ড</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="আপনার পাসওয়ার্ড" 
+                    required 
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                <span class="loading-spinner" id="spinner"></span>
+                লগইন করুন
+            </button>
+        </form>
+
+        <div class="footer">
+            <p>🔒 আপনার তথ্য সম্পূর্ণ সুরক্ষিত</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase
+        const SUPABASE_URL = localStorage.getItem('supabase_url') || '';
+        const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+
+        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+            alert('⚠️ Supabase configuration not found. Please set up your Supabase credentials first. See instructions in README.md');
+            document.getElementById('loginForm').style.display = 'none';
+        }
+
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const spinner = document.getElementById('spinner');
+
+        // Check if user is already logged in
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'profile.html';
+            }
+        }
+
+        checkAuth();
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            // Clear previous error
+            errorMessage.classList.remove('show');
+            errorMessage.textContent = '';
+
+            // Disable button and show spinner
+            loginBtn.disabled = true;
+            spinner.classList.add('show');
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                if (data.session) {
+                    // Login successful
+                    window.location.href = 'profile.html';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                // Show user-friendly error message
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMessage.textContent = '❌ ইমেইল বা পাসওয়ার্ড সঠিক নয়। আবার চেষ্টা করুন।';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage.textContent = '❌ আপনার ইমেইল এখনও যাচাই করা হয়নি। ইমেইলে পাঠানো লিঙ্কে ক্লিক করুন।';
+                } else if (error.message.includes('User not found')) {
+                    errorMessage.textContent = '❌ এই ইমেইলে কোনো অ্যাকাউন্ট নেই।';
+                } else {
+                    errorMessage.textContent = `❌ লগইন ব্যর্থ: ${error.message}`;
+                }
+                
+                errorMessage.classList.add('show');
+
+                // Re-enable button and hide spinner
+                loginBtn.disabled = false;
+                spinner.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
